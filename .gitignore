@@ -20,7 +20,7 @@ yolo11m.pt
 *.pth
 
 # ─── Datasets (too large for GitHub) ─────────────────────────────────────────
-downloaded_datasets/
+datasets/
 
 # ─── Runtime Captures & Outputs ──────────────────────────────────────────────
 captures/
