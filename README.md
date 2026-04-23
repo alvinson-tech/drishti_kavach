@@ -158,7 +158,7 @@ drishti_kavach/
 # weights/              → model .pth files — request from project lead
 # yolo11m.pt            → auto-downloaded by ultralytics on first run
 # venv/                 → Python virtual environment
-# downloaded_datasets/  → RailSem19 dataset (7.4 GB)
+# datasets/  → RailSem19 dataset (7.4 GB)
 # snapshots/            → auto-created at runtime
 # captures/             → auto-created at runtime
 # static/*.json         → auto-generated at runtime
