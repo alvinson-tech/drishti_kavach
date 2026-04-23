@@ -1,0 +1,46 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ─── Virtual Environment ──────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ─── Model Weights (too large for GitHub) ────────────────────────────────────
+weights/
+yolo11m.pt
+*.pt
+*.pth
+
+# ─── Datasets (too large for GitHub) ─────────────────────────────────────────
+downloaded_datasets/
+
+# ─── Runtime Captures & Outputs ──────────────────────────────────────────────
+captures/
+snapshots/
+
+# ─── Runtime State ────────────────────────────────────────────────────────────
+static/session_data.json
+static/session_data_hw.json
+
+# ─── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ─── IDEs & Editors ───────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── Logs & Temporary Files ───────────────────────────────────────────────────
+*.log
+*.tmp
