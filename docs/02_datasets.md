@@ -1,4 +1,4 @@
-# Drishti Kavach — Part 2: Datasets & Data Pipeline
+# Drishti Kavach: Datasets & Data Pipeline
 
 ---
 

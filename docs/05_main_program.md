@@ -1,4 +1,4 @@
-# Drishti Kavach — Part 5: main.py Feature Deep-Dive
+# Drishti Kavach: main.py Feature Deep-Dive
 
 ---
 
@@ -490,6 +490,3 @@ The report includes **explanations** of what each metric means, so non-technical
 ```
 
 ---
-
-*← [Part 4 — YOLO11m Architecture & Working](04_yolo11m.md)*
-*→ Continue to [Part 6 — Hardware Pipeline](06_hardware_pipeline.md)*

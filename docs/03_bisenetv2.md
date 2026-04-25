@@ -1,4 +1,4 @@
-# Drishti Kavach — Part 3: BiSeNetV2 Architecture & Working
+# Drishti Kavach: BiSeNetV2 Architecture & Working
 
 ---
 
@@ -296,6 +296,3 @@ LR
 This prevents the model from overshooting the optimal weights as training progresses.
 
 ---
-
-*← [Part 2 — Datasets & Data Pipeline](02_datasets.md)*
-*→ Continue to [Part 4 — YOLO11m Architecture & Working](04_yolo11m.md)*

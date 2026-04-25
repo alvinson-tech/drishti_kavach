@@ -1,4 +1,4 @@
-# Drishti Kavach — Part 7: Dashboard & Session Reporting
+# Drishti Kavach: Dashboard & Session Reporting
 
 ---
 
@@ -395,21 +395,3 @@ Because the communication is pure JSON, the dashboard can be extended easily:
 - **Alerts to phone** — add a `requests.post()` call in `write_state()` to trigger a webhook when `alert=True`
 
 ---
-
-*← [Part 6 — Hardware Pipeline](06_hardware_pipeline.md)*
-
----
-
-## Documentation Complete
-
-All 7 parts of the Drishti Kavach technical documentation have been written:
-
-| # | File | Topic |
-|---|------|-------|
-| 1 | [01_project_overview.md](01_project_overview.md) | Project overview, architecture, risk logic |
-| 2 | [02_datasets.md](02_datasets.md) | RailSem19, COCO, hardware capture pipeline |
-| 3 | [03_bisenetv2.md](03_bisenetv2.md) | BiSeNetV2 full architecture, training, OHEM loss |
-| 4 | [04_yolo11m.md](04_yolo11m.md) | YOLO11m architecture, detection pipeline |
-| 5 | [05_main_program.md](05_main_program.md) | main.py — every feature explained |
-| 6 | [06_hardware_pipeline.md](06_hardware_pipeline.md) | Capture → Label → Train → Deploy |
-| 7 | [07_dashboard.md](07_dashboard.md) | Streamlit dashboard, session reporting |

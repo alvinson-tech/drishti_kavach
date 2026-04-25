@@ -1,4 +1,4 @@
-# Drishti Kavach — Part 1: Project Overview & System Architecture
+# Drishti Kavach: Project Overview & System Architecture
 
 ---
 
@@ -88,43 +88,7 @@ Uses **custom fine-tuned** BiSeNet weights (`bisenet_hardware.pth`) trained spec
 
 ---
 
-## 5. Project File Map
-
-```
-drishti_kavach/
-│
-├── main.py                  ← Standard runtime (RailSem19 weights)
-├── main_hardware.py         ← Hardware-tuned runtime
-├── dashboard.py             ← Streamlit live dashboard
-│
-├── capture_hardware.py      ← Step 1: Capture images from prototype camera
-├── label_hardware.py        ← Step 2: Paint pixel masks on captured images
-├── train_hardware.py        ← Step 3: Fine-tune BiSeNet on labelled images
-│
-├── models/
-│   └── rail_marking/        ← BiSeNetV2 model code (segmentation handler, config)
-│
-├── weights/
-│   ├── bisenet_railsem19.pth    ← Pre-trained on RailSem19 dataset
-│   ├── bisenet_hardware.pth     ← Fine-tuned on hardware captures (best val)
-│   └── bisenet_hardware_last.pth← Fine-tuned (last epoch)
-│
-├── yolo11m.pt               ← YOLO11m weights (trained on COCO)
-│
-├── hardware_captures/       ← Raw photos from prototype camera
-├── hardware_dataset/        ← Labelled images + masks (output of label_hardware.py)
-├── test_images/             ← Static test images for image mode
-├── snapshots/               ← Saved snapshots (S key during runtime)
-├── captures/                ← Saved video recordings
-├── static/
-│   └── session_data.json    ← Live state written by main.py, read by dashboard.py
-│
-└── requirements.txt         ← All Python dependencies
-```
-
----
-
-## 6. Risk Classification Logic
+## 5. Risk Classification Logic
 
 The heart of the safety system is a 4-level risk classifier that runs on every detected object:
 
@@ -155,7 +119,7 @@ For each obstacle detected by YOLO:
 
 ---
 
-## 7. Key Design Decisions
+## 6. Key Design Decisions
 
 | Decision | Reason |
 |----------|--------|
@@ -167,7 +131,7 @@ For each obstacle detected by YOLO:
 
 ---
 
-## 8. Technology Stack
+## 7. Technology Stack
 
 | Component | Technology |
 |-----------|-----------|
@@ -181,5 +145,3 @@ For each obstacle detected by YOLO:
 | Data Augmentation | Albumentations |
 
 ---
-
-*Continue to → [Part 2 — Datasets & Data Pipeline](02_datasets.md)*

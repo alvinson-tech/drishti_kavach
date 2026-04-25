@@ -1,4 +1,4 @@
-# Drishti Kavach — Part 4: YOLO11m Architecture & Working
+# Drishti Kavach: YOLO11m Architecture & Working
 
 ---
 
@@ -289,6 +289,3 @@ The thresholds (80px, 213px) are calibrated for a **1280×720** display. At typi
 YOLO auto-resizes input frames to 640×640 internally. The bounding box coordinates are then automatically mapped back to the original frame dimensions in the results — no manual rescaling needed.
 
 ---
-
-*← [Part 3 — BiSeNetV2 Architecture & Working](03_bisenetv2.md)*
-*→ Continue to [Part 5 — main.py Feature Deep-Dive](05_main_program.md)*

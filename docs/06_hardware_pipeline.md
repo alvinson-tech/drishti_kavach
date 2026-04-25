@@ -1,4 +1,4 @@
-# Drishti Kavach — Part 6: Hardware Pipeline
+# Drishti Kavach: Hardware Pipeline
 
 ---
 
@@ -377,6 +377,3 @@ python main_hardware.py
 | Overfitting (val_loss rises while train_loss falls) | Add more augmentation or reduce `NUM_EPOCHS` |
 
 ---
-
-*← [Part 5 — main.py Feature Deep-Dive](05_main_program.md)*
-*→ Continue to [Part 7 — Dashboard & Session Reporting](07_dashboard.md)*
