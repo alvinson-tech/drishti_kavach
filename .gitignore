@@ -40,6 +40,7 @@ static/session_data_hw.json
 .idea/
 *.swp
 *.swo
+*.order
 
 # ─── Logs & Temporary Files ───────────────────────────────────────────────────
 *.log
