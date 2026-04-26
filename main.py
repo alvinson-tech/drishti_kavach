@@ -58,7 +58,6 @@ OVERLAP_THRESHOLDS = {
 
 # ─── PROXIMITY RISK THRESHOLDS (pixels at DISPLAY_SIZE resolution) ─────────
 # Distance from obstacle foot-point to nearest track pixel
-# Scaled for 1280×720 (16:9) — multiply 960×720 values by 1280/960 ≈ 1.33
 PROXIMITY_WARN_PX = 80   # closer than this  → TOO CLOSE  (semi-alert, orange box)
 PROXIMITY_SAFE_PX = 213  # closer than this  → NEAR       (yellow box, track clear)
                           # farther or equal  → FAR        (green box,  track clear)
