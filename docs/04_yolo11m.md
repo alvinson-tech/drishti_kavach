@@ -145,20 +145,42 @@ YOLO11m was trained on the **COCO dataset** (Common Objects in Context):
 | Object categories | 80 |
 | Total annotations | ~860,000 bounding boxes |
 
-The model learns to detect all 80 COCO categories. For Drishti Kavach, only the following subset is used — all others are filtered out at the Python level:
+The model learns to detect all 80 COCO categories. For Drishti Kavach, only a curated subset is used — all others are filtered out at the Python level. The two deployment scripts use different subsets tuned to their context:
 
+**`main.py` — 24 obstacle classes (standard railway deployment):**
 ```python
 OBSTACLE_CLASSES = [
-    "person",     # people on/near tracks
-    "cat",        # small animals
-    "dog",        # small animals
-    "cow",        # large animals
-    "horse",      # large animals
-    "bicycle",    # lightweight vehicles
-    "motorcycle", # lightweight vehicles
-    "car",        # passenger vehicles
-    "truck",      # heavy vehicles
-    "bus"         # heavy vehicles
+    # People
+    "person",
+    # Vehicles
+    "bicycle", "car", "motorcycle", "bus", "truck",
+    # Street furniture
+    "bench",
+    # Animals
+    "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe",
+    # Carried items
+    "backpack", "umbrella", "handbag", "suitcase",
+    # Indoor furniture / objects
+    "chair", "couch", "bed", "laptop",
+]
+```
+
+**`main_hardware.py` — 24 obstacle classes (hardware prototype deployment):**
+```python
+OBSTACLE_CLASSES = [
+    # People
+    "person",
+    # Vehicles
+    "bicycle", "car", "motorcycle", "bus", "truck",
+    # Animals
+    "cat", "dog",
+    # Carried items
+    "backpack", "umbrella", "handbag",
+    # Tabletop / small objects
+    "bottle", "cup", "knife", "spoon", "bowl",
+    "potted plant", "mouse", "remote", "cell phone",
+    "book", "scissors", "toothbrush",
 ]
 ```
 
@@ -283,7 +305,7 @@ The thresholds (80px, 213px) are calibrated for a **1280×720** display. At typi
 |--------|--------------------|-----------------------|
 | Inference time | 80–200ms | 15–50ms |
 | mAP@0.5 on COCO | ~51% | same |
-| Classes detected | 80 (filtered to 10) | same |
+| Classes detected | 80 (filtered to 24 per script) | same |
 | Input resolution | 640×640 (auto-resized) | same |
 
 YOLO auto-resizes input frames to 640×640 internally. The bounding box coordinates are then automatically mapped back to the original frame dimensions in the results — no manual rescaling needed.

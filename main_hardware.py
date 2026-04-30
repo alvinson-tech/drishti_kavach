@@ -30,13 +30,48 @@ STATE_FILE      = "static/session_data_hw.json"
 SAVE_OUTPUT     = False
 
 OBSTACLE_CLASSES = [
-    "person", "cat", "dog", "cow", "horse",
-    "bicycle", "motorcycle", "car", "truck", "bus"
+    # People
+    "person",
+    # Vehicles
+    "bicycle", "car", "motorcycle", "bus", "truck",
+    # Animals
+    "cat", "dog",
+    # Carried items
+    "backpack", "umbrella", "handbag",
+    # Tabletop / small objects
+    "bottle", "cup", "knife", "spoon", "bowl",
+    "potted plant", "mouse", "remote", "cell phone",
+    "book", "scissors", "toothbrush",
 ]
 OVERLAP_THRESHOLDS = {
-    "person": 5, "bicycle": 3, "motorcycle": 3,
-    "car": 10, "truck": 10, "bus": 10,
-    "cat": 8, "dog": 8, "cow": 8, "horse": 8,
+    # People
+    "person"      : 5,
+    # Vehicles
+    "bicycle"     : 3,
+    "motorcycle"  : 3,
+    "car"         : 10,
+    "truck"       : 10,
+    "bus"         : 10,
+    # Animals
+    "cat"         : 8,
+    "dog"         : 8,
+    # Carried items
+    "backpack"    : 8,
+    "umbrella"    : 5,
+    "handbag"     : 8,
+    # Tabletop / small objects
+    "bottle"      : 5,
+    "cup"         : 5,
+    "knife"       : 3,
+    "spoon"       : 3,
+    "bowl"        : 5,
+    "potted plant": 8,
+    "mouse"       : 3,
+    "remote"      : 3,
+    "cell phone"  : 3,
+    "book"        : 5,
+    "scissors"    : 3,
+    "toothbrush"  : 3,
 }
 PROXIMITY_WARN_PX = 80
 PROXIMITY_SAFE_PX = 213

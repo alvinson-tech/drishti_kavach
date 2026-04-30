@@ -64,16 +64,48 @@ YOLO11m was trained on COCO by the Ultralytics team. The weights file `yolo11m.p
 
 ### Obstacle classes used from COCO
 
-Only the following subset of COCO's 80 classes are considered "obstacles" relevant to railway safety:
+Both deployment scripts filter YOLO11m's output to a curated subset of COCO's 80 classes. Each script uses a different set tuned to its context:
+
+**`main.py` — 24 classes (standard railway deployment):**
 
 ```python
 OBSTACLE_CLASSES = [
-    "person", "cat", "dog", "cow", "horse",
-    "bicycle", "motorcycle", "car", "truck", "bus"
+    # People
+    "person",
+    # Vehicles
+    "bicycle", "car", "motorcycle", "bus", "truck",
+    # Street furniture
+    "bench",
+    # Animals
+    "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe",
+    # Carried items
+    "backpack", "umbrella", "handbag", "suitcase",
+    # Indoor furniture / objects
+    "chair", "couch", "bed", "laptop",
 ]
 ```
 
-All other COCO classes (chairs, TVs, food items, etc.) are silently ignored even if detected.
+**`main_hardware.py` — 24 classes (hardware prototype deployment):**
+
+```python
+OBSTACLE_CLASSES = [
+    # People
+    "person",
+    # Vehicles
+    "bicycle", "car", "motorcycle", "bus", "truck",
+    # Animals
+    "cat", "dog",
+    # Carried items
+    "backpack", "umbrella", "handbag",
+    # Tabletop / small objects
+    "bottle", "cup", "knife", "spoon", "bowl",
+    "potted plant", "mouse", "remote", "cell phone",
+    "book", "scissors", "toothbrush",
+]
+```
+
+All other COCO classes not in the respective list are silently ignored even if detected by YOLO11m.
 
 ---
 

@@ -110,12 +110,36 @@ For each obstacle detected by YOLO:
 
 ### Per-class overlap thresholds
 
-| Class | Threshold |
-|-------|-----------|
-| person | 5% |
-| bicycle, motorcycle | 3% |
-| car, truck, bus | 10% |
-| cat, dog, cow, horse | 8% |
+Each class has a tuned threshold — smaller/thinner objects need less overlap to trigger an alert, while large flat objects require more.
+
+**`main.py` — standard deployment:**
+
+| Category | Class(es) | Threshold |
+|----------|-----------|-----------|
+| People | person | 5% |
+| Vehicles | bicycle, motorcycle | 3% |
+| Vehicles | car, truck, bus | 10% |
+| Street furniture | bench | 10% |
+| Animals (medium) | cat, dog, horse, sheep, cow, zebra | 8% |
+| Animals (large) | elephant, bear, giraffe | 5% |
+| Carried items | backpack, handbag, suitcase | 8% |
+| Carried items | umbrella | 5% |
+| Indoor objects | chair, couch, bed | 10% |
+| Indoor objects | laptop | 8% |
+
+**`main_hardware.py` — hardware prototype deployment:**
+
+| Category | Class(es) | Threshold |
+|----------|-----------|-----------|
+| People | person | 5% |
+| Vehicles | bicycle, motorcycle | 3% |
+| Vehicles | car, truck, bus | 10% |
+| Animals | cat, dog | 8% |
+| Carried items | backpack, handbag | 8% |
+| Carried items | umbrella | 5% |
+| Small objects | bottle, cup, bowl, book | 5% |
+| Small objects | potted plant | 8% |
+| Small objects | knife, spoon, mouse, remote, cell phone, scissors, toothbrush | 3% |
 
 ---
 

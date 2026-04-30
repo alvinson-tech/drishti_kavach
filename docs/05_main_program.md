@@ -440,7 +440,10 @@ When the user presses Q, after cleanup, a detailed session report is printed to 
 🤖  MODELS USED
     Segmentation Model  : BiSeNetV2
     Detection Model     : YOLO11m (trained on COCO)
-    Obstacle Classes    : person, cat, dog, ...
+    Obstacle Classes    : person, bicycle, car, motorcycle, bus, truck,
+                          bench, cat, dog, horse, sheep, cow, elephant,
+                          bear, zebra, giraffe, backpack, umbrella,
+                          handbag, suitcase, chair, couch, bed, laptop
 
 📊  FRAME STATISTICS
     Total Frames Captured   : 18000

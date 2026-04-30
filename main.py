@@ -37,23 +37,54 @@ SAVE_OUTPUT     = False
 
 # Obstacle classes (from COCO dataset)
 OBSTACLE_CLASSES = [
-    "person", "cat", "dog", "cow", "horse",
-    "bicycle", "motorcycle", "car", "truck", "bus"
+    # People
+    "person",
+    # Vehicles
+    "bicycle", "car", "motorcycle", "bus", "truck",
+    # Street furniture
+    "bench",
+    # Animals
+    "cat", "dog", "horse", "sheep", "cow",
+    "elephant", "bear", "zebra", "giraffe",
+    # Carried items
+    "backpack", "umbrella", "handbag", "suitcase",
+    # Indoor furniture / objects
+    "chair", "couch", "bed", "laptop",
 ]
 
 # Per-class overlap thresholds (%)
 # How much of bottom half of bounding box must overlap track to trigger alert
 OVERLAP_THRESHOLDS = {
+    # People
     "person"    : 5,
+    # Vehicles
     "bicycle"   : 3,
     "motorcycle": 3,
     "car"       : 10,
     "truck"     : 10,
     "bus"       : 10,
+    # Street furniture
+    "bench"     : 10,
+    # Animals
     "cat"       : 8,
     "dog"       : 8,
-    "cow"       : 8,
     "horse"     : 8,
+    "sheep"     : 8,
+    "cow"       : 8,
+    "elephant"  : 5,
+    "bear"      : 5,
+    "zebra"     : 8,
+    "giraffe"   : 5,
+    # Carried items
+    "backpack"  : 8,
+    "umbrella"  : 5,
+    "handbag"   : 8,
+    "suitcase"  : 8,
+    # Indoor furniture / objects
+    "chair"     : 10,
+    "couch"     : 10,
+    "bed"       : 10,
+    "laptop"    : 8,
 }
 
 # ─── PROXIMITY RISK THRESHOLDS (pixels at DISPLAY_SIZE resolution) ─────────
