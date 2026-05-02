@@ -32,8 +32,6 @@ PROCESS_EVERY_N = 3
 DISPLAY_SIZE    = (1280, 720)
 STATE_FILE      = "static/session_data.json"
 
-# Output recording
-SAVE_OUTPUT     = False
 
 # Obstacle classes (from COCO dataset)
 OBSTACLE_CLASSES = [
@@ -110,21 +108,9 @@ session = {
     "detection_log"          : [],
 }
 
-os.makedirs("static", exist_ok=True)
-os.makedirs("snapshots", exist_ok=True)
-os.makedirs("captures", exist_ok=True)
-
-# ─── VIDEO WRITER ─────────────────────────────────────────
-video_writer = None
-OUTPUT_PATH   = ""
-if SAVE_OUTPUT:
-    OUTPUT_PATH = f"captures/capture_{time.strftime('%Y-%m-%d_%H%M')}.mp4"
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(
-        OUTPUT_PATH, fourcc, 10.0,
-        (DISPLAY_SIZE[0], DISPLAY_SIZE[1])
-    )
-    print(f"Recording output to: {OUTPUT_PATH}")
+os.makedirs("static",          exist_ok=True)
+os.makedirs("snapshots",       exist_ok=True)
+os.makedirs("session_reports", exist_ok=True)
 
 # ─── IMAGE SELECTION (image mode only) ───────────────────────────────
 if CAMERA_MODE == "image":
@@ -489,7 +475,8 @@ def detect_obstacles(frame, mask, track_detected):
     return frame
 
 # ─── SESSION REPORT ───────────────────────────────────────
-def print_report():
+def build_report_lines():
+    """Build and return the session report as a list of strings."""
     s            = session
     duration     = s["end_time"] - s["start_time"]
     duration_str = time.strftime("%H:%M:%S", time.gmtime(duration))
@@ -502,76 +489,92 @@ def print_report():
     avg_conf     = np.mean(s["detection_confidences"]) * 100 if s["detection_confidences"] else 0
     alert_rate   = (s["total_alert_frames"] / s["total_frames_processed"] * 100) if s["total_frames_processed"] > 0 else 0
 
-    print("\n")
-    print("=" * 60)
-    print("         DRISHTI KAVACH — SESSION REPORT")
-    print("=" * 60)
+    lines = []
+    lines.append("")
+    lines.append("=" * 60)
+    lines.append("         DRISHTI KAVACH — SESSION REPORT")
+    lines.append("=" * 60)
 
-    print("\n📅  SESSION INFO")
-    print(f"    Start Time          : {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(s['start_time']))}")
-    print(f"    End Time            : {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(s['end_time']))}")
-    print(f"    Total Duration      : {duration_str}")
-    print(f"    Camera              : {'Kreo Owl Lite FHD 1080p' if CAMERA_MODE == 'webcam' else 'Static Image'}")
-    print(f"    Camera Mode         : {CAMERA_MODE.upper()}")
-    print(f"    Display Resolution  : {DISPLAY_SIZE[0]}x{DISPLAY_SIZE[1]}")
+    lines.append("\n📅  SESSION INFO")
+    lines.append(f"    Start Time          : {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(s['start_time']))}")
+    lines.append(f"    End Time            : {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(s['end_time']))}")
+    lines.append(f"    Total Duration      : {duration_str}")
+    lines.append(f"    Camera              : {'Kreo Owl Lite FHD 1080p' if CAMERA_MODE == 'webcam' else 'Static Image'}")
+    lines.append(f"    Camera Mode         : {CAMERA_MODE.upper()}")
+    lines.append(f"    Display Resolution  : {DISPLAY_SIZE[0]}x{DISPLAY_SIZE[1]}")
 
-    print("\n🤖  MODELS USED")
-    print(f"    Segmentation Model  : BiSeNetV2")
-    print(f"    Segmentation Weights: bisenet_railsem19.pth (trained on RailSem19)")
-    print(f"    Detection Model     : YOLO11m (trained on COCO dataset)")
-    print(f"    Obstacle Classes    : {', '.join(OBSTACLE_CLASSES)}")
-    print(f"    Running On          : {segmentor._device}")
+    lines.append("\n🤖  MODELS USED")
+    lines.append(f"    Segmentation Model  : BiSeNetV2")
+    lines.append(f"    Segmentation Weights: bisenet_railsem19.pth (trained on RailSem19)")
+    lines.append(f"    Detection Model     : YOLO11m (trained on COCO dataset)")
+    lines.append(f"    Obstacle Classes    : {', '.join(OBSTACLE_CLASSES)}")
+    lines.append(f"    Running On          : {segmentor._device}")
 
-    print("\n📊  FRAME STATISTICS")
-    print(f"    Total Frames Captured   : {s['total_frames_captured']}")
-    print(f"    Total Frames Processed  : {s['total_frames_processed']}")
-    print(f"    Processing Rate         : Every {PROCESS_EVERY_N} frames")
-    print(f"    Average FPS             : {avg_fps:.1f} fps")
+    lines.append("\n📊  FRAME STATISTICS")
+    lines.append(f"    Total Frames Captured   : {s['total_frames_captured']}")
+    lines.append(f"    Total Frames Processed  : {s['total_frames_processed']}")
+    lines.append(f"    Processing Rate         : Every {PROCESS_EVERY_N} frames")
+    lines.append(f"    Average FPS             : {avg_fps:.1f} fps")
 
-    print("\n⚡  PERFORMANCE METRICS")
-    print(f"    Avg BiSeNet Inference   : {avg_bisenet:.1f} ms/frame")
-    print(f"    Avg YOLO11m Inference   : {avg_yolo:.1f} ms/frame")
-    print(f"    Avg Total Latency       : {avg_bisenet + avg_yolo:.1f} ms/frame")
+    lines.append("\n⚡  PERFORMANCE METRICS")
+    lines.append(f"    Avg BiSeNet Inference   : {avg_bisenet:.1f} ms/frame")
+    lines.append(f"    Avg YOLO11m Inference   : {avg_yolo:.1f} ms/frame")
+    lines.append(f"    Avg Total Latency       : {avg_bisenet + avg_yolo:.1f} ms/frame")
 
-    print("\n🛤️   BISENET — TRACK SEGMENTATION")
-    print(f"    Avg Track Coverage      : {avg_coverage:.2f}% of frame")
-    print(f"    Segmentation Stability  : ±{std_coverage:.2f}% (std deviation)")
-    print(f"    Frames Segmented        : {s['total_frames_processed']}")
+    lines.append("\n🛤️   BISENET — TRACK SEGMENTATION")
+    lines.append(f"    Avg Track Coverage      : {avg_coverage:.2f}% of frame")
+    lines.append(f"    Segmentation Stability  : ±{std_coverage:.2f}% (std deviation)")
+    lines.append(f"    Frames Segmented        : {s['total_frames_processed']}")
 
-    print("\n🎯  YOLO11m — OBSTACLE DETECTION")
-    print(f"    Total Detections        : {s['total_detections']}")
-    print(f"    Total Alert Frames      : {s['total_alert_frames']}")
-    print(f"    Alert Rate              : {alert_rate:.1f}% of processed frames")
+    lines.append("\n🎯  YOLO11m — OBSTACLE DETECTION")
+    lines.append(f"    Total Detections        : {s['total_detections']}")
+    lines.append(f"    Total Alert Frames      : {s['total_alert_frames']}")
+    lines.append(f"    Alert Rate              : {alert_rate:.1f}% of processed frames")
     if s["detection_confidences"]:
-        print(f"    Avg Detection Confidence: {avg_conf:.1f}%")
-        print(f"    Min Confidence          : {min(s['detection_confidences'])*100:.1f}%")
-        print(f"    Max Confidence          : {max(s['detection_confidences'])*100:.1f}%")
+        lines.append(f"    Avg Detection Confidence: {avg_conf:.1f}%")
+        lines.append(f"    Min Confidence          : {min(s['detection_confidences'])*100:.1f}%")
+        lines.append(f"    Max Confidence          : {max(s['detection_confidences'])*100:.1f}%")
     else:
-        print(f"    Avg Detection Confidence: N/A (no detections this session)")
+        lines.append(f"    Avg Detection Confidence: N/A (no detections this session)")
 
     if s["detection_classes"]:
-        print(f"\n    Obstacles Detected By Class:")
+        lines.append(f"\n    Obstacles Detected By Class:")
         for cls, count in sorted(s["detection_classes"].items(),
                                   key=lambda x: x[1], reverse=True):
-            print(f"      → {cls:<15} : {count} time(s)")
+            lines.append(f"      → {cls:<15} : {count} time(s)")
 
-    print("\n📈  ACCURACY EXPLANATION")
-    print("    Confidence Score: YOLO11m's certainty that a detected object")
-    print("    is what it says it is (0-100%). A score of 80% means the")
-    print("    model is 80% sure the detected object is correct.")
-    print("")
-    print("    Track Coverage: % of the camera frame identified as railway")
-    print("    track by BiSeNet. Stable coverage = consistent segmentation.")
-    print("")
-    print("    Alert Rate: % of processed frames where an obstacle was")
-    print("    found inside the track region.")
-    print("")
-    print("    Note: Full precision/recall metrics require a labelled ground")
-    print("    truth dataset. These metrics reflect live system performance.")
+    lines.append("\n📈  ACCURACY EXPLANATION")
+    lines.append("    Confidence Score: YOLO11m's certainty that a detected object")
+    lines.append("    is what it says it is (0-100%). A score of 80% means the")
+    lines.append("    model is 80% sure the detected object is correct.")
+    lines.append("")
+    lines.append("    Track Coverage: % of the camera frame identified as railway")
+    lines.append("    track by BiSeNet. Stable coverage = consistent segmentation.")
+    lines.append("")
+    lines.append("    Alert Rate: % of processed frames where an obstacle was")
+    lines.append("    found inside the track region.")
+    lines.append("")
+    lines.append("    Note: Full precision/recall metrics require a labelled ground")
+    lines.append("    truth dataset. These metrics reflect live system performance.")
 
-    print("\n" + "=" * 60)
-    print("              END OF SESSION REPORT")
-    print("=" * 60 + "\n")
+    lines.append("\n" + "=" * 60)
+    lines.append("              END OF SESSION REPORT")
+    lines.append("=" * 60 + "\n")
+    return lines
+
+def print_report():
+    lines = build_report_lines()
+    for line in lines:
+        print(line)
+
+def save_report():
+    """Save the session report to a timestamped txt file in session_reports/."""
+    report_time = time.strftime('%Y-%m-%d_%H%M%S')
+    report_path = f"session_reports/report_{report_time}.txt"
+    lines = build_report_lines()
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write("\n".join(lines))
+    print(f"  Session report saved: {report_path}")
 
 # ─── WEBCAM READER (Kreo Owl Lite FHD 1080p) ──────────────
 def webcam_reader():
@@ -715,7 +718,7 @@ while True:
 
     # S key — save snapshot
     if key == ord('s'):
-        snapshot_path = f"snapshots/snapshot_{time.strftime('%Y-%m-%d_%H%M')}.jpg"
+        snapshot_path = f"snapshots/snapshot_{time.strftime('%Y-%m-%d_%H%M%S')}.jpg"
         cv2.imwrite(snapshot_path, display)
         print(f"  Snapshot saved: {snapshot_path}")
 
@@ -728,9 +731,6 @@ while True:
 
 cv2.destroyAllWindows()
 
-if SAVE_OUTPUT and video_writer is not None:
-    video_writer.release()
-    print(f"Recording saved to: {OUTPUT_PATH}")
-
 write_state()
 print_report()
+save_report()

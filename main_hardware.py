@@ -27,7 +27,6 @@ WEIGHTS_PATH  = "weights/bisenet_hardware.pth"
 PROCESS_EVERY_N = 3
 DISPLAY_SIZE    = (1280, 720)
 STATE_FILE      = "static/session_data_hw.json"
-SAVE_OUTPUT     = False
 
 OBSTACLE_CLASSES = [
     # People
@@ -85,17 +84,9 @@ session = {
     "fps_samples": [], "detection_log": [],
 }
 
-os.makedirs("static",    exist_ok=True)
-os.makedirs("snapshots", exist_ok=True)
-os.makedirs("captures",  exist_ok=True)
-
-video_writer = None
-OUTPUT_PATH  = ""
-if SAVE_OUTPUT:
-    OUTPUT_PATH = f"captures/hw_capture_{time.strftime('%Y-%m-%d_%H%M')}.mp4"
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    video_writer = cv2.VideoWriter(OUTPUT_PATH, fourcc, 10.0, DISPLAY_SIZE)
-    print(f"Recording output to: {OUTPUT_PATH}")
+os.makedirs("static",          exist_ok=True)
+os.makedirs("snapshots",       exist_ok=True)
+os.makedirs("session_reports", exist_ok=True)
 
 if CAMERA_MODE == "image":
     print("=" * 60)
@@ -374,8 +365,9 @@ def detect_obstacles(frame, mask, track_detected):
     return frame
 
 # ─── SESSION REPORT ───────────────────────────────────────────────
-def print_report():
-    s = session
+def build_report_lines():
+    """Build and return the session report as a list of strings."""
+    s            = session
     duration     = s["end_time"] - s["start_time"]
     duration_str = time.strftime("%H:%M:%S", time.gmtime(duration))
     avg_bisenet  = np.mean(s["bisenet_times"])         if s["bisenet_times"]         else 0
@@ -385,29 +377,45 @@ def print_report():
     avg_conf     = np.mean(s["detection_confidences"]) * 100 if s["detection_confidences"] else 0
     alert_rate   = (s["total_alert_frames"] / s["total_frames_processed"] * 100) if s["total_frames_processed"] > 0 else 0
 
-    print("\n" + "=" * 60)
-    print("    DRISHTI KAVACH [Hardware Model] — SESSION REPORT")
-    print("=" * 60)
-    print(f"\n    Duration      : {duration_str}")
-    print(f"    Camera Mode   : {CAMERA_MODE.upper()}")
-    print(f"    BiSeNet Weights: {WEIGHTS_PATH}")
-    print(f"    Device        : {segmentor._device}")
-    print(f"\n    Frames Captured  : {s['total_frames_captured']}")
-    print(f"    Frames Processed : {s['total_frames_processed']}")
-    print(f"    Avg FPS          : {avg_fps:.1f}")
-    print(f"\n    Avg BiSeNet ms   : {avg_bisenet:.1f}")
-    print(f"    Avg YOLO ms      : {avg_yolo:.1f}")
-    print(f"    Avg Track Cover  : {avg_coverage:.2f}%")
-    print(f"\n    Total Detections : {s['total_detections']}")
-    print(f"    Alert Frames     : {s['total_alert_frames']}")
-    print(f"    Alert Rate       : {alert_rate:.1f}%")
+    lines = []
+    lines.append("\n" + "=" * 60)
+    lines.append("    DRISHTI KAVACH [Hardware Model] — SESSION REPORT")
+    lines.append("=" * 60)
+    lines.append(f"\n    Duration      : {duration_str}")
+    lines.append(f"    Camera Mode   : {CAMERA_MODE.upper()}")
+    lines.append(f"    BiSeNet Weights: {WEIGHTS_PATH}")
+    lines.append(f"    Device        : {segmentor._device}")
+    lines.append(f"\n    Frames Captured  : {s['total_frames_captured']}")
+    lines.append(f"    Frames Processed : {s['total_frames_processed']}")
+    lines.append(f"    Avg FPS          : {avg_fps:.1f}")
+    lines.append(f"\n    Avg BiSeNet ms   : {avg_bisenet:.1f}")
+    lines.append(f"    Avg YOLO ms      : {avg_yolo:.1f}")
+    lines.append(f"    Avg Track Cover  : {avg_coverage:.2f}%")
+    lines.append(f"\n    Total Detections : {s['total_detections']}")
+    lines.append(f"    Alert Frames     : {s['total_alert_frames']}")
+    lines.append(f"    Alert Rate       : {alert_rate:.1f}%")
     if s["detection_confidences"]:
-        print(f"    Avg Confidence   : {avg_conf:.1f}%")
+        lines.append(f"    Avg Confidence   : {avg_conf:.1f}%")
     if s["detection_classes"]:
-        print("\n    Obstacles by Class:")
+        lines.append("\n    Obstacles by Class:")
         for cls, cnt in sorted(s["detection_classes"].items(), key=lambda x: x[1], reverse=True):
-            print(f"      → {cls:<15}: {cnt}")
-    print("\n" + "=" * 60 + "\n")
+            lines.append(f"      → {cls:<15}: {cnt}")
+    lines.append("\n" + "=" * 60 + "\n")
+    return lines
+
+def print_report():
+    lines = build_report_lines()
+    for line in lines:
+        print(line)
+
+def save_report():
+    """Save the session report to a timestamped txt file in session_reports/."""
+    report_time = time.strftime('%Y-%m-%d_%H%M%S')
+    report_path = f"session_reports/hw_report_{report_time}.txt"
+    lines = build_report_lines()
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write("\n".join(lines))
+    print(f"  Session report saved: {report_path}")
 
 # ─── CAMERA THREADS ───────────────────────────────────────────────
 def webcam_reader():
@@ -528,9 +536,6 @@ while True:
 
     cv2.imshow("Drishti Kavach [Hardware Model]", display)
 
-    if SAVE_OUTPUT and video_writer is not None:
-        video_writer.write(display)
-
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord('s'):
@@ -546,9 +551,6 @@ while True:
 
 cv2.destroyAllWindows()
 
-if SAVE_OUTPUT and video_writer is not None:
-    video_writer.release()
-    print(f"Recording saved: {OUTPUT_PATH}")
-
 write_state()
 print_report()
+save_report()
