@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drishti Kavach — AI Railway Safety</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --white: #ffffff;
+    --off-white: #f8f8f6;
+    --light: #f0efeb;
+    --border: #d8d7d3;
+    --muted: #6b6966;
+    --text: #0f0e0d;
+    --accent: #0f0e0d;
+    --grid-color: rgba(15,14,13,0.05);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--white);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── LOADING SCREEN ── */
+  #loader {
+    position: fixed; inset: 0;
+    background: var(--white);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #loader-track {
+    width: 100%;
+    height: 22px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(14px);
+    overflow: visible;
+  }
+
+  #train-container {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-46px);
+    left: -520px;
+  }
+
+  #train-container svg {
+    display: block;
+  }
+
+  @keyframes wheelSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .wheel-spin {
+    animation: wheelSpin 0.6s linear infinite;
+    transform-origin: center;
+  }
+
+  @keyframes steamPuff {
+    0%   { opacity: 0.7; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-18px) scale(2.2); }
+  }
+
+  .steam-puff {
+    animation: steamPuff 0.65s ease-out infinite;
+  }
+  .steam-puff:nth-child(2) { animation-delay: 0.22s; }
+  .steam-puff:nth-child(3) { animation-delay: 0.44s; }
+
+  .loader-label {
+    position: absolute;
+    bottom: 80px;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .loader-progress {
+    position: absolute;
+    bottom: 60px;
+    width: 120px;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .loader-progress-fill {
+    height: 100%;
+    background: var(--text);
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* ── GRID BG ── */
+  .grid-bg {
+    background-image:
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .nav-links a {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    padding: 0 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-tag {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: var(--muted);
+  }
+
+  .hero-title {
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -2px;
+    max-width: 900px;
+    margin-bottom: 40px;
+  }
+
+  .hero-title .line-2 {
+    color: var(--muted);
+  }
+
+  .hero-sub {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--muted);
+    max-width: 440px;
+    font-weight: 400;
+    margin-bottom: 56px;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .btn-primary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    background: var(--text);
+    color: var(--white);
+    border: 1px solid var(--text);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover { background: transparent; color: var(--text); }
+
+  .btn-ghost {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+  .hero-corner-tag {
+    position: absolute;
+    bottom: 48px;
+    right: 48px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 48px;
+    left: 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 40px;
+    height: 1px;
+    background: var(--muted);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-line::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: var(--text);
+    animation: scanline 2s ease-in-out infinite;
+  }
+
+  @keyframes scanline {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .hero-model-badges {
+    position: absolute;
+    top: 140px;
+    right: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .model-badge {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: rgba(255,255,255,0.8);
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    padding: 120px 48px;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 60px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 80px;
+  }
+
+  .section-title {
+    font-size: clamp(30px, 4vw, 52px);
+    font-weight: 600;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+  }
+
+  /* ── ABOUT ── */
+  #about {
+    background: var(--off-white);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .about-text p {
+    font-size: 14px;
+    line-height: 2;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .stat-cell {
+    background: var(--off-white);
+    padding: 28px 24px;
+  }
+
+  .stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .tech-stack {
+    margin-top: 40px;
+  }
+
+  .tech-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    margin: 4px 4px 0 0;
+    background: var(--white);
+  }
+
+  /* ── PIPELINE / WORKFLOW ── */
+  #pipeline {
+    background: var(--white);
+  }
+
+  .pipeline-intro {
+    font-size: 14px;
+    line-height: 2;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 80px;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .step-card {
+    padding: 40px 32px;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+
+  .step-card:last-child { border-right: none; }
+
+  .step-number {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .step-icon-area {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .step-icon-area svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text);
+    fill: none;
+    stroke-width: 1.5;
+  }
+
+  .step-name {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 12px;
+  }
+
+  .step-desc {
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .step-file {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  /* Architecture diagram in pipeline */
+  .arch-box {
+    margin-top: 80px;
+    border: 1px solid var(--border);
+    padding: 48px;
+    background: var(--off-white);
+    position: relative;
+  }
+
+  .arch-label {
+    position: absolute;
+    top: -10px;
+    left: 32px;
+    background: var(--off-white);
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    row-gap: 24px;
+  }
+
+  .arch-node {
+    flex: 1;
+    min-width: 100px;
+    padding: 16px 12px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+  }
+
+  .arch-node-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .arch-node-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+
+  .arch-arrow {
+    width: 32px;
+    height: 1px;
+    background: var(--border);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .arch-arrow::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -3px;
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    transform: rotate(45deg);
+  }
+
+  .arch-node.highlight {
+    background: var(--text);
+    border-color: var(--text);
+  }
+
+  .arch-node.highlight .arch-node-label { color: rgba(255,255,255,0.5); }
+  .arch-node.highlight .arch-node-name { color: var(--white); }
+
+  /* ── IMAGES ── */
+  #gallery {
+    background: var(--off-white);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin-top: 16px;
+  }
+
+  .gallery-item {
+    background: var(--white);
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gallery-canvas {
+    flex: 1;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .gallery-canvas:hover { background: #e8e7e2; }
+
+  .gallery-upload-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .upload-plus {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .upload-text {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .gallery-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .gallery-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+    position: absolute;
+    inset: 0;
+  }
+
+  .gallery-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .gallery-footer-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .gallery-footer-index {
+    font-size: 10px;
+    color: var(--border);
+  }
+
+  /* ── VIDEOS ── */
+  #videos {
+    background: var(--white);
+  }
+
+  .video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    margin-top: 16px;
+  }
+
+  .video-item {
+    background: var(--white);
+    position: relative;
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .video-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--off-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: background 0.2s;
+  }
+
+  .video-placeholder:hover { background: var(--light); }
+
+  .video-play-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .video-play-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--muted);
+    margin-left: 2px;
+  }
+
+  .video-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .video-tag {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .video-embed {
+    position: absolute;
+    inset: 0;
+    display: none;
+  }
+
+  .video-embed iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* ── GITHUB ── */
+  #github {
+    background: var(--text);
+    color: var(--white);
+    border-top: none;
+  }
+
+  #github .section-label { color: rgba(255,255,255,0.3); }
+  #github .section-label::after { background: rgba(255,255,255,0.1); }
+
+  .github-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+  }
+
+  .github-title {
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1;
+    color: var(--white);
+    max-width: 600px;
+    margin-bottom: 24px;
+  }
+
+  .github-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    max-width: 380px;
+    line-height: 1.9;
+  }
+
+  .github-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    background: var(--white);
+    color: var(--text);
+    border: 1px solid var(--white);
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
+
+  .github-link:hover {
+    background: transparent;
+    color: var(--white);
+  }
+
+  .github-link svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .github-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .github-meta-item {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .github-meta-item span {
+    display: block;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  /* ── PEOPLE (Team first, Guide strip below) ── */
+  #people {
+    background: var(--off-white);
+  }
+
+  /* Full-width 4-column team grid */
+  .team-panel-full {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 1px;
+  }
+
+  .team-card {
+    background: var(--white);
+    padding: 40px 32px 36px;
+    transition: background 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .team-card:hover { background: var(--off-white); }
+
+  .team-card-num {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .team-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 2px;
+    background: var(--text);
+    border: 1px solid var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+
+  .team-card:not(:first-child) .team-avatar {
+    background: var(--light);
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  .team-name {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .team-role {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .team-role.lead-role {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .team-college {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--border);
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Guide strip — compact horizontal bar */
+  .guide-strip {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: none;
+    padding: 20px 28px;
+    margin-top: 0;
+  }
+
+  .guide-strip-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-right: 20px;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .guide-strip-avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .guide-strip-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .guide-strip-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    color: var(--text);
+  }
+
+  .guide-strip-meta {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── PEOPLE END ── */
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 24px 48px;
+    background: var(--text);
+    color: rgba(255,255,255,0.2);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* ── RISK TABLE ── */
+  .risk-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 40px;
+    font-size: 12px;
+  }
+
+  .risk-table th {
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  .risk-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .risk-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .risk-row td:first-child {
+    display: flex;
+    align-items: center;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div id="loader-track">
+    <!-- Improved SVG track with sleepers, rendered as inline SVG over the full width -->
+    <svg id="track-svg" style="position:absolute;top:-10px;left:0;width:100%;height:22px;" preserveAspectRatio="none" viewBox="0 0 1200 22" xmlns="http://www.w3.org/2000/svg">
+      <!-- Two rails -->
+      <line x1="0" y1="6" x2="1200" y2="6" stroke="#d8d7d3" stroke-width="2.5"/>
+      <line x1="0" y1="16" x2="1200" y2="16" stroke="#d8d7d3" stroke-width="2.5"/>
+      <!-- Sleepers (ties) -->
+      <g stroke="#e0dfdb" stroke-width="2">
+        <line x1="10"  y1="2" x2="10"  y2="20"/>
+        <line x1="50"  y1="2" x2="50"  y2="20"/>
+        <line x1="90"  y1="2" x2="90"  y2="20"/>
+        <line x1="130" y1="2" x2="130" y2="20"/>
+        <line x1="170" y1="2" x2="170" y2="20"/>
+        <line x1="210" y1="2" x2="210" y2="20"/>
+        <line x1="250" y1="2" x2="250" y2="20"/>
+        <line x1="290" y1="2" x2="290" y2="20"/>
+        <line x1="330" y1="2" x2="330" y2="20"/>
+        <line x1="370" y1="2" x2="370" y2="20"/>
+        <line x1="410" y1="2" x2="410" y2="20"/>
+        <line x1="450" y1="2" x2="450" y2="20"/>
+        <line x1="490" y1="2" x2="490" y2="20"/>
+        <line x1="530" y1="2" x2="530" y2="20"/>
+        <line x1="570" y1="2" x2="570" y2="20"/>
+        <line x1="610" y1="2" x2="610" y2="20"/>
+        <line x1="650" y1="2" x2="650" y2="20"/>
+        <line x1="690" y1="2" x2="690" y2="20"/>
+        <line x1="730" y1="2" x2="730" y2="20"/>
+        <line x1="770" y1="2" x2="770" y2="20"/>
+        <line x1="810" y1="2" x2="810" y2="20"/>
+        <line x1="850" y1="2" x2="850" y2="20"/>
+        <line x1="890" y1="2" x2="890" y2="20"/>
+        <line x1="930" y1="2" x2="930" y2="20"/>
+        <line x1="970" y1="2" x2="970" y2="20"/>
+        <line x1="1010" y1="2" x2="1010" y2="20"/>
+        <line x1="1050" y1="2" x2="1050" y2="20"/>
+        <line x1="1090" y1="2" x2="1090" y2="20"/>
+        <line x1="1130" y1="2" x2="1130" y2="20"/>
+        <line x1="1170" y1="2" x2="1170" y2="20"/>
+      </g>
+    </svg>
+  </div>
+  <div id="train-container">
+    <!-- Wheelless modern train SVG -->
+    <svg width="460" height="56" viewBox="0 0 460 56" xmlns="http://www.w3.org/2000/svg">
+      <!-- Steam puffs from chimney -->
+      <g transform="translate(398, 4)">
+        <circle class="steam-puff" cx="0" cy="0" r="4" fill="#d0cfcb" opacity="0.7"/>
+        <circle class="steam-puff" cx="6" cy="-4" r="3" fill="#c8c7c3" opacity="0.5"/>
+        <circle class="steam-puff" cx="-4" cy="-6" r="3" fill="#d0cfcb" opacity="0.5"/>
+      </g>
+
+      <!-- Car 2 (rear) — flat-bottomed, no wheels -->
+      <rect x="0" y="8" width="108" height="38" rx="3" fill="#f0efeb" stroke="#c8c7c3" stroke-width="1.5"/>
+      <!-- bottom rail groove -->
+      <rect x="0" y="43" width="108" height="3" rx="1" fill="#dddcd8"/>
+      <!-- windows -->
+      <rect x="12" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <rect x="34" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <rect x="56" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <rect x="78" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <!-- label -->
+      <text x="54" y="38" font-family="JetBrains Mono, monospace" font-size="6.5" fill="#aaa" letter-spacing="1.5" text-anchor="middle">KAVACH</text>
+      <!-- coupler -->
+      <rect x="108" y="24" width="9" height="5" rx="1" fill="#bbb"/>
+
+      <!-- Car 1 (middle) -->
+      <rect x="117" y="8" width="108" height="38" rx="3" fill="#f0efeb" stroke="#c8c7c3" stroke-width="1.5"/>
+      <rect x="117" y="43" width="108" height="3" rx="1" fill="#dddcd8"/>
+      <rect x="129" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <rect x="151" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <rect x="173" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <rect x="195" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
+      <text x="171" y="38" font-family="JetBrains Mono, monospace" font-size="6.5" fill="#aaa" letter-spacing="1.5" text-anchor="middle">AI // 01</text>
+      <!-- coupler -->
+      <rect x="225" y="24" width="9" height="5" rx="1" fill="#bbb"/>
+
+      <!-- Engine -->
+      <rect x="234" y="2" width="192" height="44" rx="4" fill="#1a1917"/>
+      <!-- nose slant -->
+      <polygon points="426,2 448,14 448,44 426,46" fill="#222120"/>
+      <!-- top accent stripe -->
+      <rect x="234" y="2" width="192" height="4" rx="2" fill="#333" opacity="0.8"/>
+      <!-- bottom rail skirt -->
+      <rect x="234" y="43" width="192" height="3" rx="1" fill="#111"/>
+      <!-- cab windows -->
+      <rect x="352" y="10" width="20" height="14" rx="2" fill="#c8dff5" stroke="#4a8ab5" stroke-width="0.8"/>
+      <rect x="326" y="10" width="20" height="14" rx="2" fill="#c8dff5" stroke="#4a8ab5" stroke-width="0.8"/>
+      <rect x="300" y="10" width="20" height="14" rx="2" fill="#c8dff5" stroke="#4a8ab5" stroke-width="0.8"/>
+      <!-- headlight -->
+      <circle cx="445" cy="26" r="5" fill="#fbbf24" opacity="0.9"/>
+      <circle cx="445" cy="26" r="2.5" fill="#fef9c3"/>
+      <!-- engine text -->
+      <text x="252" y="32" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="white" letter-spacing="2">DRISHTI</text>
+      <!-- number plate -->
+      <rect x="252" y="36" width="48" height="8" rx="1" fill="#2e2c2a" opacity="0.9"/>
+      <text x="276" y="43" font-family="JetBrains Mono, monospace" font-size="6.5" fill="#999" letter-spacing="1" text-anchor="middle">01</text>
+      <!-- chimney -->
+      <rect x="392" y="0" width="8" height="8" rx="1" fill="#333"/>
+    </svg>
+  </div>
+  <div class="loader-label">Initializing System</div>
+  <div class="loader-progress"><div class="loader-progress-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- NAV -->
+<nav id="main-nav" style="opacity:0; transition: opacity 0.5s;">
+  <div class="nav-logo">Drishti Kavach</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#videos">Videos</a></li>
+    <li><a href="#people">Team</a></li>
+    <li><a href="#github">Github</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero" class="grid-bg">
+  <div class="hero-tag">Project 2025–26 · Computer Vision + AI Safety</div>
+  <h1 class="hero-title">
+    <span class="line-1">Drishti</span><br>
+    <span class="line-2">Kavach</span>
+  </h1>
+  <p class="hero-sub">
+    Real-time AI-powered railway obstacle detection. BiSeNetV2 semantic segmentation + YOLO11m object detection running in parallel at 30 FPS.
+  </p>
+  <div class="hero-ctas">
+    <a href="#about" class="btn-primary">Explore Project</a>
+    <a href="#github" class="btn-ghost">View on Github →</a>
+  </div>
+
+  <div class="hero-model-badges">
+    <div class="model-badge">BiSeNetV2</div>
+    <div class="model-badge">YOLO11m</div>
+    <div class="model-badge">RailSem19</div>
+    <div class="model-badge">COCO 80-cls</div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+  <div class="hero-corner-tag">Shield of Vision</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="grid-bg">
+  <div class="section-label">01 — Overview</div>
+  <div class="about-grid">
+    <div class="about-text fade-up">
+      <h2 class="section-title">What it<br>solves</h2>
+      <p>Railway accidents caused by obstacles — animals, people, vehicles at level crossings — are a critical safety problem globally. Traditional camera systems rely on human operators watching feeds manually, introducing dangerous reaction-time delays and attention fatigue.</p>
+      <p>Drishti Kavach (Hindi: <em>Shield of Vision</em>) automates this entirely. The system continuously watches camera feeds at up to ~30 FPS, segments the exact track region using BiSeNetV2, detects obstacles using YOLO11m, cross-references both outputs to determine risk, and issues real-time alerts.</p>
+      <div class="tech-stack">
+        <span class="tech-tag">Python 3.10+</span>
+        <span class="tech-tag">PyTorch 2.x</span>
+        <span class="tech-tag">OpenCV 4.x</span>
+        <span class="tech-tag">BiSeNetV2</span>
+        <span class="tech-tag">YOLO11m</span>
+        <span class="tech-tag">Streamlit</span>
+        <span class="tech-tag">CUDA / MPS / CPU</span>
+        <span class="tech-tag">Albumentations</span>
+      </div>
+    </div>
+    <div class="fade-up" style="transition-delay: 0.15s;">
+      <div class="about-stats">
+        <div class="stat-cell">
+          <div class="stat-num">30</div>
+          <div class="stat-label">FPS Live Detection</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">4</div>
+          <div class="stat-label">Risk Levels</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">24</div>
+          <div class="stat-label">Obstacle Classes</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num">8.5K</div>
+          <div class="stat-label">RailSem19 Images</div>
+        </div>
+      </div>
+
+      <table class="risk-table" style="margin-top:32px;">
+        <thead>
+          <tr>
+            <th>Risk Level</th>
+            <th>Condition</th>
+            <th>Alert</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="risk-row">
+            <td><span class="risk-dot" style="background:#e24b4a;"></span>ON TRACK</td>
+            <td>Overlap ≥ threshold</td>
+            <td>Full Kavach Alert</td>
+          </tr>
+          <tr class="risk-row">
+            <td><span class="risk-dot" style="background:#ef9f27;"></span>TOO CLOSE</td>
+            <td>Dist &lt; 80px</td>
+            <td>Semi Alert</td>
+          </tr>
+          <tr class="risk-row">
+            <td><span class="risk-dot" style="background:#ba7517;"></span>NEAR</td>
+            <td>Dist &lt; 213px</td>
+            <td>Warning</td>
+          </tr>
+          <tr class="risk-row">
+            <td><span class="risk-dot" style="background:#639922;"></span>FAR</td>
+            <td>Dist ≥ 213px</td>
+            <td>Safe</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section id="pipeline">
+  <div class="section-label">02 — System Design</div>
+  <h2 class="section-title fade-up">Architecture &<br>Workflow</h2>
+  <p class="pipeline-intro fade-up">
+    A multi-threaded producer-consumer pipeline separates frame capture, AI inference, and display into independent threads — ensuring smooth 30 FPS output regardless of model speed.
+  </p>
+
+  <div class="steps-grid fade-up">
+    <div class="step-card">
+      <div class="step-number">Step 01</div>
+      <div class="step-icon-area">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+      </div>
+      <div class="step-name">Capture</div>
+      <div class="step-desc">Webcam or static image reader thread captures frames at 1920×1080 and writes to shared buffer via thread-safe lock.</div>
+      <div class="step-file">capture_hardware.py</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Step 02</div>
+      <div class="step-icon-area">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <div class="step-name">Segment</div>
+      <div class="step-desc">BiSeNetV2 performs pixel-level semantic segmentation at 512×1024 to identify rail-lines, track-bed, and background per frame.</div>
+      <div class="step-file">bisenet_railsem19.pth</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Step 03</div>
+      <div class="step-icon-area">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div class="step-name">Detect</div>
+      <div class="step-desc">YOLO11m runs object detection at conf=0.15 across 24 obstacle classes. Bounding boxes are clamped to frame bounds.</div>
+      <div class="step-file">yolo11m.pt</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">Step 04</div>
+      <div class="step-icon-area">
+        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <div class="step-name">Classify &amp; Alert</div>
+      <div class="step-desc">Overlap + proximity analysis per detection. Risk level assigned. Dashboard JSON written every 0.5s. OpenCV window displays live.</div>
+      <div class="step-file">main.py / dashboard.py</div>
+    </div>
+  </div>
+
+  <div class="arch-box fade-up">
+    <div class="arch-label">Data Flow</div>
+    <div class="arch-flow">
+      <div class="arch-node">
+        <div class="arch-node-label">Input</div>
+        <div class="arch-node-name">Camera<br>/ Image</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node">
+        <div class="arch-node-label">Thread 1</div>
+        <div class="arch-node-name">Frame<br>Reader</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node highlight">
+        <div class="arch-node-label">Thread 2</div>
+        <div class="arch-node-name">Model<br>Runner</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node">
+        <div class="arch-node-label">Main Thread</div>
+        <div class="arch-node-name">Display<br>Loop</div>
+      </div>
+      <div class="arch-arrow"></div>
+      <div class="arch-node">
+        <div class="arch-node-label">Decoupled</div>
+        <div class="arch-node-name">Streamlit<br>Dashboard</div>
+      </div>
+    </div>
+    <div style="margin-top:24px; font-size:10px; color:var(--muted); letter-spacing:1px;">
+      Thread 2 processes every Nth frame (N=3) — runs both BiSeNetV2 + YOLO11m, writes annotated output + session JSON.
+    </div>
+  </div>
+</section>
+
+
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="section-label">03 — Visual Output</div>
+  <h2 class="section-title fade-up">Project<br>Images</h2>
+  <p style="font-size:12px; color:var(--muted); margin-bottom:8px; letter-spacing:0.5px;">Click any cell to upload a local image.</p>
+
+  <div class="gallery-grid fade-up">
+    <div class="gallery-item">
+      <div class="gallery-canvas" id="gc-0" onclick="document.getElementById('gi-0').click()">
+        <img class="gallery-preview" id="gp-0" alt="">
+        <div class="gallery-upload-hint">
+          <div class="upload-plus">+</div>
+          <div class="upload-text">BiSeNet Output</div>
+        </div>
+        <input type="file" class="gallery-input" id="gi-0" accept="image/*" onchange="loadImg(0,this)">
+      </div>
+      <div class="gallery-footer">
+        <span class="gallery-footer-label">Track Segmentation</span>
+        <span class="gallery-footer-index">01 / 06</span>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <div class="gallery-canvas" id="gc-1" onclick="document.getElementById('gi-1').click()">
+        <img class="gallery-preview" id="gp-1" alt="">
+        <div class="gallery-upload-hint">
+          <div class="upload-plus">+</div>
+          <div class="upload-text">YOLO Detection</div>
+        </div>
+        <input type="file" class="gallery-input" id="gi-1" accept="image/*" onchange="loadImg(1,this)">
+      </div>
+      <div class="gallery-footer">
+        <span class="gallery-footer-label">Obstacle Detection</span>
+        <span class="gallery-footer-index">02 / 06</span>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <div class="gallery-canvas" id="gc-2" onclick="document.getElementById('gi-2').click()">
+        <img class="gallery-preview" id="gp-2" alt="">
+        <div class="gallery-upload-hint">
+          <div class="upload-plus">+</div>
+          <div class="upload-text">On Track Alert</div>
+        </div>
+        <input type="file" class="gallery-input" id="gi-2" accept="image/*" onchange="loadImg(2,this)">
+      </div>
+      <div class="gallery-footer">
+        <span class="gallery-footer-label">Full Kavach Alert</span>
+        <span class="gallery-footer-index">03 / 06</span>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <div class="gallery-canvas" id="gc-3" onclick="document.getElementById('gi-3').click()">
+        <img class="gallery-preview" id="gp-3" alt="">
+        <div class="gallery-upload-hint">
+          <div class="upload-plus">+</div>
+          <div class="upload-text">Dashboard View</div>
+        </div>
+        <input type="file" class="gallery-input" id="gi-3" accept="image/*" onchange="loadImg(3,this)">
+      </div>
+      <div class="gallery-footer">
+        <span class="gallery-footer-label">Streamlit Dashboard</span>
+        <span class="gallery-footer-index">04 / 06</span>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <div class="gallery-canvas" id="gc-4" onclick="document.getElementById('gi-4').click()">
+        <img class="gallery-preview" id="gp-4" alt="">
+        <div class="gallery-upload-hint">
+          <div class="upload-plus">+</div>
+          <div class="upload-text">Hardware Prototype</div>
+        </div>
+        <input type="file" class="gallery-input" id="gi-4" accept="image/*" onchange="loadImg(4,this)">
+      </div>
+      <div class="gallery-footer">
+        <span class="gallery-footer-label">Hardware Setup</span>
+        <span class="gallery-footer-index">05 / 06</span>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <div class="gallery-canvas" id="gc-5" onclick="document.getElementById('gi-5').click()">
+        <img class="gallery-preview" id="gp-5" alt="">
+        <div class="gallery-upload-hint">
+          <div class="upload-plus">+</div>
+          <div class="upload-text">Label Tool</div>
+        </div>
+        <input type="file" class="gallery-input" id="gi-5" accept="image/*" onchange="loadImg(5,this)">
+      </div>
+      <div class="gallery-footer">
+        <span class="gallery-footer-label">Mask Labelling</span>
+        <span class="gallery-footer-index">06 / 06</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEOS -->
+<section id="videos">
+  <div class="section-label">04 — Demonstrations</div>
+  <h2 class="section-title fade-up">Demo<br>Videos</h2>
+
+  <div class="video-grid fade-up">
+    <div class="video-item" id="v0">
+      <div class="video-placeholder" onclick="playVideo(0)">
+        <div class="video-play-btn">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="video-label">Live Detection Demo</div>
+      </div>
+      <div class="video-embed" id="ve0"></div>
+      <div class="video-tag">01 / Main System</div>
+    </div>
+    <div class="video-item" id="v1">
+      <div class="video-placeholder" onclick="playVideo(1)">
+        <div class="video-play-btn">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="video-label">Dashboard Walkthrough</div>
+      </div>
+      <div class="video-embed" id="ve1"></div>
+      <div class="video-tag">02 / Dashboard</div>
+    </div>
+    <div class="video-item" id="v2">
+      <div class="video-placeholder" onclick="playVideo(2)">
+        <div class="video-play-btn">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="video-label">Hardware Prototype Run</div>
+      </div>
+      <div class="video-embed" id="ve2"></div>
+      <div class="video-tag">03 / Hardware Mode</div>
+    </div>
+    <div class="video-item" id="v3">
+      <div class="video-placeholder" onclick="playVideo(3)">
+        <div class="video-play-btn">
+          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>
+        <div class="video-label">Training Pipeline</div>
+      </div>
+      <div class="video-embed" id="ve3"></div>
+      <div class="video-tag">04 / Fine-Tuning</div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px; font-size:10px; color:var(--muted); letter-spacing:1px;">
+    Videos are placeholder slots. Replace <code>playVideo(n)</code> logic with your embed URLs.
+  </div>
+</section>
+
+<!-- GITHUB (removed from here, now at end) -->
+
+<!-- PEOPLE: Team first, Guide below -->
+<section id="people">
+  <div class="section-label">06 — Acknowledgement &amp; Team</div>
+
+  <!-- Team members grid (prominent, first) -->
+  <div class="team-panel-full fade-up">
+    <div class="team-card">
+      <div class="team-card-num">01 / 04</div>
+      <div class="team-avatar">GK</div>
+      <div class="team-name">Gowri Krishnan Nair</div>
+      <div class="team-role lead-role">Team Lead</div>
+      <div class="team-college">MVJ College of Engineering</div>
+    </div>
+    <div class="team-card">
+      <div class="team-card-num">02 / 04</div>
+      <div class="team-avatar">AS</div>
+      <div class="team-name">Ananya Sanjiv</div>
+      <div class="team-role">Team Member</div>
+      <div class="team-college">MVJ College of Engineering</div>
+    </div>
+    <div class="team-card">
+      <div class="team-card-num">03 / 04</div>
+      <div class="team-avatar">AL</div>
+      <div class="team-name">Alvin Sonny</div>
+      <div class="team-role">Team Member</div>
+      <div class="team-college">MVJ College of Engineering</div>
+    </div>
+    <div class="team-card">
+      <div class="team-card-num">04 / 04</div>
+      <div class="team-avatar">GT</div>
+      <div class="team-name">Ganesha Thejaswi V</div>
+      <div class="team-role">Team Member</div>
+      <div class="team-college">MVJ College of Engineering</div>
+    </div>
+  </div>
+
+  <!-- Guide strip (smaller, after team) -->
+  <div class="guide-strip fade-up">
+    <div class="guide-strip-label">Project Guide</div>
+    <div class="guide-strip-avatar">SK</div>
+    <div class="guide-strip-info">
+      <div class="guide-strip-name">Prof. Sujitha K L</div>
+      <div class="guide-strip-meta">Faculty Guide · Department of Computer Science &amp; Engineering · MVJCE · 2025–26</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- GITHUB — at the end -->
+<section id="github">
+  <div class="section-label">07 — Source Code</div>
+  <div class="github-inner">
+    <div>
+      <h2 class="github-title">Open<br>Source</h2>
+      <p class="github-sub">All code, weights configuration, training scripts, and the Streamlit dashboard are available on GitHub. Star the repo to stay updated.</p>
+    </div>
+    <a href="https://github.com/alvinson-tech/drishti_kavach" class="github-link" target="_blank">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+      </svg>
+      View on GitHub
+    </a>
+  </div>
+  <div class="github-meta">
+    <div class="github-meta-item">Language<span>Python 3.10+</span></div>
+    <div class="github-meta-item">License<span>MIT</span></div>
+    <div class="github-meta-item">Models<span>BiSeNetV2 · YOLO11m</span></div>
+    <div class="github-meta-item">Dataset<span>RailSem19 · COCO</span></div>
+  </div>
+</section>
+
+<footer>
+  <span>Drishti Kavach — AI Railway Safety System · 2025–26</span>
+  <span>Built with PyTorch · OpenCV · Streamlit</span>
+</footer>
+
+<script>
+  // ── LOADER ──
+  const loader = document.getElementById('loader');
+  const trainEl = document.getElementById('train-container');
+  const progressFill = document.getElementById('progress-fill');
+  const nav = document.getElementById('main-nav');
+  const totalW = window.innerWidth + 600;
+
+  let startTime = null;
+  const duration = 2200;
+
+  function animateTrain(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = progress;
+    const x = -520 + eased * (totalW + 520);
+    trainEl.style.left = x + 'px';
+    progressFill.style.width = (progress * 100) + '%';
+
+    if (progress < 1) {
+      requestAnimationFrame(animateTrain);
+    } else {
+      setTimeout(() => {
+        loader.style.opacity = '0';
+        loader.style.transition = 'opacity 0.6s ease';
+        nav.style.opacity = '1';
+        setTimeout(() => { loader.style.display = 'none'; }, 700);
+        animateFadeUps();
+      }, 300);
+    }
+  }
+
+  requestAnimationFrame(animateTrain);
+
+  // ── SCROLL FADE UPS ──
+  function animateFadeUps() {
+    const els = document.querySelectorAll('.fade-up');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(el => obs.observe(el));
+  }
+
+  // ── GALLERY IMAGE UPLOAD ──
+  function loadImg(idx, input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = document.getElementById('gp-' + idx);
+      const canvas = document.getElementById('gc-' + idx);
+      img.src = e.target.result;
+      img.style.display = 'block';
+      canvas.querySelector('.gallery-upload-hint').style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  // ── VIDEO PLAY (placeholder — replace with real URLs) ──
+  const videoUrls = [
+    '',
+    '',
+    '',
+    ''
+  ];
+
+  function playVideo(n) {
+    const url = videoUrls[n];
+    const ve = document.getElementById('ve' + n);
+    const vp = document.querySelector('#v' + n + ' .video-placeholder');
+    if (!url) {
+      vp.style.background = '#f0efeb';
+      const hint = document.createElement('div');
+      hint.style.cssText = 'font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#999;text-align:center;padding:24px;';
+      hint.textContent = 'Add video URL to videoUrls[' + n + ']';
+      vp.innerHTML = '';
+      vp.appendChild(hint);
+      return;
+    }
+    const isYT = url.includes('youtube') || url.includes('youtu.be');
+    const embedUrl = isYT ? url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') + '?autoplay=1' : url;
+    ve.innerHTML = '<iframe src="' + embedUrl + '" allowfullscreen allow="autoplay"></iframe>';
+    vp.style.display = 'none';
+    ve.style.display = 'block';
+  }
+</script>
+</body>
+</html>

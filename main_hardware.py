@@ -17,7 +17,7 @@ from segmentation.deploy.railtrack_segmentation_handler import RailtrackSegmenta
 from bisenetv2_cfg import BiSeNetV2Config
 
 # ─── CONFIG ───────────────────────────────────────────────────────
-CAMERA_MODE   = "image"
+CAMERA_MODE   = "webcam"
 WEBCAM_INDEX  = 0
 TEST_IMAGE_PATH = "hardware_captures/capture_0024.jpg"
 

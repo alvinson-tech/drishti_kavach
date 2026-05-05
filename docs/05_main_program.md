@@ -25,7 +25,6 @@ WEIGHTS_PATH     = "weights/bisenet_railsem19.pth"
 PROCESS_EVERY_N  = 3               # run models on 1 in every N frames
 DISPLAY_SIZE     = (1280, 720)     # output window resolution (16:9)
 STATE_FILE       = "static/session_data.json"
-SAVE_OUTPUT      = False           # set True to record MP4
 ```
 
 ### Camera Modes
@@ -72,7 +71,6 @@ A startup summary is printed to console:
       Camera Mode   : WEBCAM
       Display Size  : (1280, 720)
       Process Rate  : Every 3 frames
-      Save Output   : False
 ════════════════════════════════════════════════════
 ```
 
@@ -382,9 +380,6 @@ while True:
 
     cv2.imshow("Drishti Kavach", display)
 
-    if SAVE_OUTPUT and video_writer:
-        video_writer.write(display)
-
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord('s'):    # Save snapshot
@@ -404,22 +399,6 @@ while True:
 
 ---
 
-## 13. Video Recording
-
-If `SAVE_OUTPUT = True`, an MP4 video is recorded:
-
-```python
-OUTPUT_PATH = f"captures/capture_{time.strftime('%Y-%m-%d_%H%M')}.mp4"
-fourcc      = cv2.VideoWriter_fourcc(*'mp4v')
-video_writer = cv2.VideoWriter(OUTPUT_PATH, fourcc, 10.0, DISPLAY_SIZE)
-```
-
-- Format: MP4 with `mp4v` codec
-- Frame rate: 10 FPS (reflects the ~10 processed frames per second typical throughput)
-- Resolution: 1280×720
-- Saved to: `captures/` directory
-
----
 
 ## 14. Session Report (`print_report`)
 
@@ -477,17 +456,15 @@ The report includes **explanations** of what each metric means, so non-technical
 3. Load YOLO11m weights
 4. Load BiSeNetV2 weights + handler
 5. Print config summary
-6. Create output directories (static/, snapshots/, captures/)
-7. Optionally open VideoWriter
-8. Start camera thread
+6. Create output directories (static/, snapshots/, session_reports/)
+7. Start camera thread
 9. Start model_runner thread
 10. Block until first output frame is ready
 11. Print "running" message with controls hint
 12. Enter display loop
 13. (User presses Q)
 14. Set running=False → threads terminate
-15. Release VideoWriter if active
-16. Write final state to JSON
+15. Write final state to JSON
 17. Print session report
 18. Exit
 ```

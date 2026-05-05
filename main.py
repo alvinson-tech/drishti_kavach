@@ -19,7 +19,7 @@ from bisenetv2_cfg import BiSeNetV2Config
 
 # ─── CONFIG ───────────────────────────────────────────────
 # Camera mode: "webcam" or "image"
-CAMERA_MODE     = "webcam"
+CAMERA_MODE     = "image"
 
 # Webcam settings (Kreo Owl Lite FHD 1080p)
 WEBCAM_INDEX    = 0
@@ -153,7 +153,6 @@ print(f"      Camera        : {'Kreo Owl Lite FHD 1080p' if CAMERA_MODE == 'webc
 print(f"      Camera Mode   : {CAMERA_MODE.upper()}")
 print(f"      Display Size  : {DISPLAY_SIZE}")
 print(f"      Process Rate  : Every {PROCESS_EVERY_N} frames")
-print(f"      Save Output   : {SAVE_OUTPUT}")
 print("=" * 60 + "\n")
 
 # ─── SHARED STATE ─────────────────────────────────────────
@@ -709,10 +708,6 @@ while True:
             continue
 
     cv2.imshow("Drishti Kavach", display)
-
-    # Save output recording
-    if SAVE_OUTPUT and video_writer is not None:
-        video_writer.write(display)
 
     key = cv2.waitKey(1) & 0xFF
 
