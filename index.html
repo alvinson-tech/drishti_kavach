@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Drishti Kavach — AI Railway Safety</title>
+<link rel="icon" type="image/png" href="train.png">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,83 +27,6 @@
     background: var(--white);
     color: var(--text);
     overflow-x: hidden;
-  }
-
-  /* ── LOADING SCREEN ── */
-  #loader {
-    position: fixed; inset: 0;
-    background: var(--white);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-
-  #loader-track {
-    width: 100%;
-    height: 22px;
-    position: absolute;
-    top: 50%;
-    transform: translateY(14px);
-    overflow: visible;
-  }
-
-  #train-container {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-46px);
-    left: -520px;
-  }
-
-  #train-container svg {
-    display: block;
-  }
-
-  @keyframes wheelSpin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .wheel-spin {
-    animation: wheelSpin 0.6s linear infinite;
-    transform-origin: center;
-  }
-
-  @keyframes steamPuff {
-    0%   { opacity: 0.7; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-18px) scale(2.2); }
-  }
-
-  .steam-puff {
-    animation: steamPuff 0.65s ease-out infinite;
-  }
-  .steam-puff:nth-child(2) { animation-delay: 0.22s; }
-  .steam-puff:nth-child(3) { animation-delay: 0.44s; }
-
-  .loader-label {
-    position: absolute;
-    bottom: 80px;
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .loader-progress {
-    position: absolute;
-    bottom: 60px;
-    width: 120px;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .loader-progress-fill {
-    height: 100%;
-    background: var(--text);
-    width: 0%;
-    transition: width 0.1s linear;
   }
 
   /* ── GRID BG ── */
@@ -577,89 +501,26 @@
   }
 
   .gallery-item {
-    background: var(--white);
+    background: var(--light);
     position: relative;
     overflow: hidden;
     aspect-ratio: 4/3;
-    display: flex;
-    flex-direction: column;
   }
 
   .gallery-canvas {
-    flex: 1;
-    background: var(--light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    height: 100%;
     position: relative;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .gallery-canvas:hover { background: #e8e7e2; }
-
-  .gallery-upload-hint {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    pointer-events: none;
-  }
-
-  .upload-plus {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: var(--muted);
-    font-weight: 300;
-    line-height: 1;
-  }
-
-  .upload-text {
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .gallery-input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
+    overflow: hidden;
   }
 
   .gallery-preview {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: none;
+    display: block;
     position: absolute;
     inset: 0;
-  }
-
-  .gallery-footer {
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .gallery-footer-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .gallery-footer-index {
-    font-size: 10px;
-    color: var(--border);
   }
 
   /* ── VIDEOS ── */
@@ -676,77 +537,20 @@
   }
 
   .video-item {
-    background: var(--white);
+    background: var(--text);
     position: relative;
     aspect-ratio: 16/9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
-    cursor: pointer;
   }
 
-  .video-placeholder {
+  .video-native {
     width: 100%;
     height: 100%;
-    background: var(--off-white);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    transition: background 0.2s;
+    display: block;
+    object-fit: cover;
+    background: #0f0e0d;
   }
 
-  .video-placeholder:hover { background: var(--light); }
-
-  .video-play-btn {
-    width: 48px;
-    height: 48px;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .video-play-btn svg {
-    width: 16px;
-    height: 16px;
-    fill: var(--muted);
-    margin-left: 2px;
-  }
-
-  .video-label {
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .video-tag {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    font-size: 8px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 4px 8px;
-    background: var(--white);
-    border: 1px solid var(--border);
-    color: var(--muted);
-  }
-
-  .video-embed {
-    position: absolute;
-    inset: 0;
-    display: none;
-  }
-
-  .video-embed iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
 
   /* ── GITHUB ── */
   #github {
@@ -1049,114 +853,8 @@
 </head>
 <body>
 
-<!-- LOADER -->
-<div id="loader">
-  <div id="loader-track">
-    <!-- Improved SVG track with sleepers, rendered as inline SVG over the full width -->
-    <svg id="track-svg" style="position:absolute;top:-10px;left:0;width:100%;height:22px;" preserveAspectRatio="none" viewBox="0 0 1200 22" xmlns="http://www.w3.org/2000/svg">
-      <!-- Two rails -->
-      <line x1="0" y1="6" x2="1200" y2="6" stroke="#d8d7d3" stroke-width="2.5"/>
-      <line x1="0" y1="16" x2="1200" y2="16" stroke="#d8d7d3" stroke-width="2.5"/>
-      <!-- Sleepers (ties) -->
-      <g stroke="#e0dfdb" stroke-width="2">
-        <line x1="10"  y1="2" x2="10"  y2="20"/>
-        <line x1="50"  y1="2" x2="50"  y2="20"/>
-        <line x1="90"  y1="2" x2="90"  y2="20"/>
-        <line x1="130" y1="2" x2="130" y2="20"/>
-        <line x1="170" y1="2" x2="170" y2="20"/>
-        <line x1="210" y1="2" x2="210" y2="20"/>
-        <line x1="250" y1="2" x2="250" y2="20"/>
-        <line x1="290" y1="2" x2="290" y2="20"/>
-        <line x1="330" y1="2" x2="330" y2="20"/>
-        <line x1="370" y1="2" x2="370" y2="20"/>
-        <line x1="410" y1="2" x2="410" y2="20"/>
-        <line x1="450" y1="2" x2="450" y2="20"/>
-        <line x1="490" y1="2" x2="490" y2="20"/>
-        <line x1="530" y1="2" x2="530" y2="20"/>
-        <line x1="570" y1="2" x2="570" y2="20"/>
-        <line x1="610" y1="2" x2="610" y2="20"/>
-        <line x1="650" y1="2" x2="650" y2="20"/>
-        <line x1="690" y1="2" x2="690" y2="20"/>
-        <line x1="730" y1="2" x2="730" y2="20"/>
-        <line x1="770" y1="2" x2="770" y2="20"/>
-        <line x1="810" y1="2" x2="810" y2="20"/>
-        <line x1="850" y1="2" x2="850" y2="20"/>
-        <line x1="890" y1="2" x2="890" y2="20"/>
-        <line x1="930" y1="2" x2="930" y2="20"/>
-        <line x1="970" y1="2" x2="970" y2="20"/>
-        <line x1="1010" y1="2" x2="1010" y2="20"/>
-        <line x1="1050" y1="2" x2="1050" y2="20"/>
-        <line x1="1090" y1="2" x2="1090" y2="20"/>
-        <line x1="1130" y1="2" x2="1130" y2="20"/>
-        <line x1="1170" y1="2" x2="1170" y2="20"/>
-      </g>
-    </svg>
-  </div>
-  <div id="train-container">
-    <!-- Wheelless modern train SVG -->
-    <svg width="460" height="56" viewBox="0 0 460 56" xmlns="http://www.w3.org/2000/svg">
-      <!-- Steam puffs from chimney -->
-      <g transform="translate(398, 4)">
-        <circle class="steam-puff" cx="0" cy="0" r="4" fill="#d0cfcb" opacity="0.7"/>
-        <circle class="steam-puff" cx="6" cy="-4" r="3" fill="#c8c7c3" opacity="0.5"/>
-        <circle class="steam-puff" cx="-4" cy="-6" r="3" fill="#d0cfcb" opacity="0.5"/>
-      </g>
-
-      <!-- Car 2 (rear) — flat-bottomed, no wheels -->
-      <rect x="0" y="8" width="108" height="38" rx="3" fill="#f0efeb" stroke="#c8c7c3" stroke-width="1.5"/>
-      <!-- bottom rail groove -->
-      <rect x="0" y="43" width="108" height="3" rx="1" fill="#dddcd8"/>
-      <!-- windows -->
-      <rect x="12" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <rect x="34" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <rect x="56" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <rect x="78" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <!-- label -->
-      <text x="54" y="38" font-family="JetBrains Mono, monospace" font-size="6.5" fill="#aaa" letter-spacing="1.5" text-anchor="middle">KAVACH</text>
-      <!-- coupler -->
-      <rect x="108" y="24" width="9" height="5" rx="1" fill="#bbb"/>
-
-      <!-- Car 1 (middle) -->
-      <rect x="117" y="8" width="108" height="38" rx="3" fill="#f0efeb" stroke="#c8c7c3" stroke-width="1.5"/>
-      <rect x="117" y="43" width="108" height="3" rx="1" fill="#dddcd8"/>
-      <rect x="129" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <rect x="151" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <rect x="173" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <rect x="195" y="16" width="16" height="11" rx="1.5" fill="#c8dff5" stroke="#a0b4c8" stroke-width="0.8"/>
-      <text x="171" y="38" font-family="JetBrains Mono, monospace" font-size="6.5" fill="#aaa" letter-spacing="1.5" text-anchor="middle">AI // 01</text>
-      <!-- coupler -->
-      <rect x="225" y="24" width="9" height="5" rx="1" fill="#bbb"/>
-
-      <!-- Engine -->
-      <rect x="234" y="2" width="192" height="44" rx="4" fill="#1a1917"/>
-      <!-- nose slant -->
-      <polygon points="426,2 448,14 448,44 426,46" fill="#222120"/>
-      <!-- top accent stripe -->
-      <rect x="234" y="2" width="192" height="4" rx="2" fill="#333" opacity="0.8"/>
-      <!-- bottom rail skirt -->
-      <rect x="234" y="43" width="192" height="3" rx="1" fill="#111"/>
-      <!-- cab windows -->
-      <rect x="352" y="10" width="20" height="14" rx="2" fill="#c8dff5" stroke="#4a8ab5" stroke-width="0.8"/>
-      <rect x="326" y="10" width="20" height="14" rx="2" fill="#c8dff5" stroke="#4a8ab5" stroke-width="0.8"/>
-      <rect x="300" y="10" width="20" height="14" rx="2" fill="#c8dff5" stroke="#4a8ab5" stroke-width="0.8"/>
-      <!-- headlight -->
-      <circle cx="445" cy="26" r="5" fill="#fbbf24" opacity="0.9"/>
-      <circle cx="445" cy="26" r="2.5" fill="#fef9c3"/>
-      <!-- engine text -->
-      <text x="252" y="32" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="white" letter-spacing="2">DRISHTI</text>
-      <!-- number plate -->
-      <rect x="252" y="36" width="48" height="8" rx="1" fill="#2e2c2a" opacity="0.9"/>
-      <text x="276" y="43" font-family="JetBrains Mono, monospace" font-size="6.5" fill="#999" letter-spacing="1" text-anchor="middle">01</text>
-      <!-- chimney -->
-      <rect x="392" y="0" width="8" height="8" rx="1" fill="#333"/>
-    </svg>
-  </div>
-  <div class="loader-label">Initializing System</div>
-  <div class="loader-progress"><div class="loader-progress-fill" id="progress-fill"></div></div>
-</div>
-
 <!-- NAV -->
-<nav id="main-nav" style="opacity:0; transition: opacity 0.5s;">
+<nav id="main-nav">
   <div class="nav-logo">Drishti Kavach</div>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
@@ -1358,91 +1056,36 @@
 <section id="gallery">
   <div class="section-label">03 — Visual Output</div>
   <h2 class="section-title fade-up">Project<br>Images</h2>
-  <p style="font-size:12px; color:var(--muted); margin-bottom:8px; letter-spacing:0.5px;">Click any cell to upload a local image.</p>
 
   <div class="gallery-grid fade-up">
     <div class="gallery-item">
-      <div class="gallery-canvas" id="gc-0" onclick="document.getElementById('gi-0').click()">
-        <img class="gallery-preview" id="gp-0" alt="">
-        <div class="gallery-upload-hint">
-          <div class="upload-plus">+</div>
-          <div class="upload-text">BiSeNet Output</div>
-        </div>
-        <input type="file" class="gallery-input" id="gi-0" accept="image/*" onchange="loadImg(0,this)">
-      </div>
-      <div class="gallery-footer">
-        <span class="gallery-footer-label">Track Segmentation</span>
-        <span class="gallery-footer-index">01 / 06</span>
+      <div class="gallery-canvas">
+        <img class="gallery-preview" src="assets/images/1.jpg" alt="Track Segmentation">
       </div>
     </div>
     <div class="gallery-item">
-      <div class="gallery-canvas" id="gc-1" onclick="document.getElementById('gi-1').click()">
-        <img class="gallery-preview" id="gp-1" alt="">
-        <div class="gallery-upload-hint">
-          <div class="upload-plus">+</div>
-          <div class="upload-text">YOLO Detection</div>
-        </div>
-        <input type="file" class="gallery-input" id="gi-1" accept="image/*" onchange="loadImg(1,this)">
-      </div>
-      <div class="gallery-footer">
-        <span class="gallery-footer-label">Obstacle Detection</span>
-        <span class="gallery-footer-index">02 / 06</span>
+      <div class="gallery-canvas">
+        <img class="gallery-preview" src="assets/images/2.jpg" alt="Obstacle Detection">
       </div>
     </div>
     <div class="gallery-item">
-      <div class="gallery-canvas" id="gc-2" onclick="document.getElementById('gi-2').click()">
-        <img class="gallery-preview" id="gp-2" alt="">
-        <div class="gallery-upload-hint">
-          <div class="upload-plus">+</div>
-          <div class="upload-text">On Track Alert</div>
-        </div>
-        <input type="file" class="gallery-input" id="gi-2" accept="image/*" onchange="loadImg(2,this)">
-      </div>
-      <div class="gallery-footer">
-        <span class="gallery-footer-label">Full Kavach Alert</span>
-        <span class="gallery-footer-index">03 / 06</span>
+      <div class="gallery-canvas">
+        <img class="gallery-preview" src="assets/images/3.jpg" alt="Full Kavach Alert">
       </div>
     </div>
     <div class="gallery-item">
-      <div class="gallery-canvas" id="gc-3" onclick="document.getElementById('gi-3').click()">
-        <img class="gallery-preview" id="gp-3" alt="">
-        <div class="gallery-upload-hint">
-          <div class="upload-plus">+</div>
-          <div class="upload-text">Dashboard View</div>
-        </div>
-        <input type="file" class="gallery-input" id="gi-3" accept="image/*" onchange="loadImg(3,this)">
-      </div>
-      <div class="gallery-footer">
-        <span class="gallery-footer-label">Streamlit Dashboard</span>
-        <span class="gallery-footer-index">04 / 06</span>
+      <div class="gallery-canvas">
+        <img class="gallery-preview" src="assets/images/4.jpg" alt="Streamlit Dashboard">
       </div>
     </div>
     <div class="gallery-item">
-      <div class="gallery-canvas" id="gc-4" onclick="document.getElementById('gi-4').click()">
-        <img class="gallery-preview" id="gp-4" alt="">
-        <div class="gallery-upload-hint">
-          <div class="upload-plus">+</div>
-          <div class="upload-text">Hardware Prototype</div>
-        </div>
-        <input type="file" class="gallery-input" id="gi-4" accept="image/*" onchange="loadImg(4,this)">
-      </div>
-      <div class="gallery-footer">
-        <span class="gallery-footer-label">Hardware Setup</span>
-        <span class="gallery-footer-index">05 / 06</span>
+      <div class="gallery-canvas">
+        <img class="gallery-preview" src="assets/images/5.jpg" alt="Hardware Setup">
       </div>
     </div>
     <div class="gallery-item">
-      <div class="gallery-canvas" id="gc-5" onclick="document.getElementById('gi-5').click()">
-        <img class="gallery-preview" id="gp-5" alt="">
-        <div class="gallery-upload-hint">
-          <div class="upload-plus">+</div>
-          <div class="upload-text">Label Tool</div>
-        </div>
-        <input type="file" class="gallery-input" id="gi-5" accept="image/*" onchange="loadImg(5,this)">
-      </div>
-      <div class="gallery-footer">
-        <span class="gallery-footer-label">Mask Labelling</span>
-        <span class="gallery-footer-index">06 / 06</span>
+      <div class="gallery-canvas">
+        <img class="gallery-preview" src="assets/images/6.jpg" alt="Mask Labelling">
       </div>
     </div>
   </div>
@@ -1454,50 +1097,12 @@
   <h2 class="section-title fade-up">Demo<br>Videos</h2>
 
   <div class="video-grid fade-up">
-    <div class="video-item" id="v0">
-      <div class="video-placeholder" onclick="playVideo(0)">
-        <div class="video-play-btn">
-          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        </div>
-        <div class="video-label">Live Detection Demo</div>
-      </div>
-      <div class="video-embed" id="ve0"></div>
-      <div class="video-tag">01 / Main System</div>
+    <div class="video-item">
+      <video class="video-native" src="assets/videos/1.mp4" controls preload="metadata"></video>
     </div>
-    <div class="video-item" id="v1">
-      <div class="video-placeholder" onclick="playVideo(1)">
-        <div class="video-play-btn">
-          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        </div>
-        <div class="video-label">Dashboard Walkthrough</div>
-      </div>
-      <div class="video-embed" id="ve1"></div>
-      <div class="video-tag">02 / Dashboard</div>
+    <div class="video-item">
+      <video class="video-native" src="assets/videos/2.mp4" controls preload="metadata"></video>
     </div>
-    <div class="video-item" id="v2">
-      <div class="video-placeholder" onclick="playVideo(2)">
-        <div class="video-play-btn">
-          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        </div>
-        <div class="video-label">Hardware Prototype Run</div>
-      </div>
-      <div class="video-embed" id="ve2"></div>
-      <div class="video-tag">03 / Hardware Mode</div>
-    </div>
-    <div class="video-item" id="v3">
-      <div class="video-placeholder" onclick="playVideo(3)">
-        <div class="video-play-btn">
-          <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        </div>
-        <div class="video-label">Training Pipeline</div>
-      </div>
-      <div class="video-embed" id="ve3"></div>
-      <div class="video-tag">04 / Fine-Tuning</div>
-    </div>
-  </div>
-
-  <div style="margin-top:16px; font-size:10px; color:var(--muted); letter-spacing:1px;">
-    Videos are placeholder slots. Replace <code>playVideo(n)</code> logic with your embed URLs.
   </div>
 </section>
 
@@ -1580,90 +1185,14 @@
 </footer>
 
 <script>
-  // ── LOADER ──
-  const loader = document.getElementById('loader');
-  const trainEl = document.getElementById('train-container');
-  const progressFill = document.getElementById('progress-fill');
-  const nav = document.getElementById('main-nav');
-  const totalW = window.innerWidth + 600;
-
-  let startTime = null;
-  const duration = 2200;
-
-  function animateTrain(ts) {
-    if (!startTime) startTime = ts;
-    const elapsed = ts - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = progress;
-    const x = -520 + eased * (totalW + 520);
-    trainEl.style.left = x + 'px';
-    progressFill.style.width = (progress * 100) + '%';
-
-    if (progress < 1) {
-      requestAnimationFrame(animateTrain);
-    } else {
-      setTimeout(() => {
-        loader.style.opacity = '0';
-        loader.style.transition = 'opacity 0.6s ease';
-        nav.style.opacity = '1';
-        setTimeout(() => { loader.style.display = 'none'; }, 700);
-        animateFadeUps();
-      }, 300);
-    }
-  }
-
-  requestAnimationFrame(animateTrain);
-
   // ── SCROLL FADE UPS ──
-  function animateFadeUps() {
+  (function() {
     const els = document.querySelectorAll('.fade-up');
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
     }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     els.forEach(el => obs.observe(el));
-  }
-
-  // ── GALLERY IMAGE UPLOAD ──
-  function loadImg(idx, input) {
-    if (!input.files || !input.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = document.getElementById('gp-' + idx);
-      const canvas = document.getElementById('gc-' + idx);
-      img.src = e.target.result;
-      img.style.display = 'block';
-      canvas.querySelector('.gallery-upload-hint').style.display = 'none';
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-
-  // ── VIDEO PLAY (placeholder — replace with real URLs) ──
-  const videoUrls = [
-    '',
-    '',
-    '',
-    ''
-  ];
-
-  function playVideo(n) {
-    const url = videoUrls[n];
-    const ve = document.getElementById('ve' + n);
-    const vp = document.querySelector('#v' + n + ' .video-placeholder');
-    if (!url) {
-      vp.style.background = '#f0efeb';
-      const hint = document.createElement('div');
-      hint.style.cssText = 'font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#999;text-align:center;padding:24px;';
-      hint.textContent = 'Add video URL to videoUrls[' + n + ']';
-      vp.innerHTML = '';
-      vp.appendChild(hint);
-      return;
-    }
-    const isYT = url.includes('youtube') || url.includes('youtu.be');
-    const embedUrl = isYT ? url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/') + '?autoplay=1' : url;
-    ve.innerHTML = '<iframe src="' + embedUrl + '" allowfullscreen allow="autoplay"></iframe>';
-    vp.style.display = 'none';
-    ve.style.display = 'block';
-  }
+  })();
 </script>
 </body>
 </html>
