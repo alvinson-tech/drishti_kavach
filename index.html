@@ -853,13 +853,15 @@
   .nav-hamburger {
     display: none;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
     gap: 5px;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px;
-    z-index: 200;
+    padding: 6px;
+    z-index: 300;
+    flex-shrink: 0;
   }
 
   .nav-hamburger span {
@@ -890,6 +892,7 @@
     /* Nav */
     nav {
       padding: 16px 20px;
+      z-index: 300;
     }
 
     .nav-hamburger {
@@ -906,7 +909,8 @@
       align-items: center;
       justify-content: center;
       gap: 36px;
-      z-index: 150;
+      z-index: 250;
+      list-style: none;
     }
 
     .nav-links.open {
@@ -1506,6 +1510,11 @@
     btn.addEventListener('click', () => {
       const isOpen = links.classList.toggle('open');
       btn.classList.toggle('open', isOpen);
+      // Keep hamburger above the overlay when menu is open
+      btn.style.position = isOpen ? 'fixed' : '';
+      btn.style.top = isOpen ? '16px' : '';
+      btn.style.right = isOpen ? '20px' : '';
+      btn.style.zIndex = isOpen ? '400' : '';
       document.body.style.overflow = isOpen ? 'hidden' : '';
     });
 
@@ -1514,6 +1523,10 @@
       a.addEventListener('click', () => {
         links.classList.remove('open');
         btn.classList.remove('open');
+        btn.style.position = '';
+        btn.style.top = '';
+        btn.style.right = '';
+        btn.style.zIndex = '';
         document.body.style.overflow = '';
       });
     });
