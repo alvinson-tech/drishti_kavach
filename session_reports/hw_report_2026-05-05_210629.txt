@@ -1,0 +1,23 @@
+
+============================================================
+    DRISHTI KAVACH [Hardware Model] — SESSION REPORT
+============================================================
+
+    Duration      : 00:00:03
+    Camera Mode   : IMAGE
+    BiSeNet Weights: weights/bisenet_hardware.pth
+    Device        : mps
+
+    Frames Captured  : 35
+    Frames Processed : 5
+    Avg FPS          : 13.1
+
+    Avg BiSeNet ms   : 289.4
+    Avg YOLO ms      : 239.3
+    Avg Track Cover  : 97.92%
+
+    Total Detections : 0
+    Alert Frames     : 0
+    Alert Rate       : 0.0%
+
+============================================================
