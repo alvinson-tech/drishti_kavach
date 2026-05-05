@@ -886,6 +886,18 @@
     transform: translateY(-6.5px) rotate(-45deg);
   }
 
+  .nav-dim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.25);
+    z-index: 200;
+  }
+
+  .nav-dim.open {
+    display: block;
+  }
+
   /* ── MOBILE RESPONSIVE ── */
   @media (max-width: 768px) {
 
@@ -900,26 +912,46 @@
     }
 
     .nav-links {
-      display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.98);
-      backdrop-filter: blur(12px);
+      top: 0;
+      right: 0;
+      width: 240px;
+      height: 100vh;
+      background: #ffffff;
+      border-left: 1px solid var(--border);
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 36px;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 80px 28px 40px;
+      gap: 0;
       z-index: 250;
       list-style: none;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      box-shadow: -8px 0 32px rgba(0,0,0,0.08);
     }
 
-    .nav-links.open {
-      display: flex;
+    .nav-links li {
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-links li:first-child {
+      border-top: 1px solid var(--border);
     }
 
     .nav-links a {
-      font-size: 13px;
-      letter-spacing: 4px;
+      display: block;
+      font-size: 11px;
+      letter-spacing: 3px;
+      padding: 16px 0;
+      color: var(--text);
+      width: 100%;
+    }
+
+    .nav-links.open {
+      transform: translateX(0);
     }
 
     /* Hero */
@@ -1174,6 +1206,7 @@
     <span></span><span></span><span></span>
   </button>
 </nav>
+<div class="nav-dim" id="nav-dim"></div>
 
 <!-- HERO -->
 <section id="hero" class="grid-bg">
@@ -1505,30 +1538,31 @@
   (function() {
     const btn = document.getElementById('nav-hamburger');
     const links = document.getElementById('nav-links');
+    const dim = document.getElementById('nav-dim');
     if (!btn || !links) return;
 
+    function openMenu() {
+      links.classList.add('open');
+      btn.classList.add('open');
+      if (dim) dim.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMenu() {
+      links.classList.remove('open');
+      btn.classList.remove('open');
+      if (dim) dim.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
     btn.addEventListener('click', () => {
-      const isOpen = links.classList.toggle('open');
-      btn.classList.toggle('open', isOpen);
-      // Keep hamburger above the overlay when menu is open
-      btn.style.position = isOpen ? 'fixed' : '';
-      btn.style.top = isOpen ? '16px' : '';
-      btn.style.right = isOpen ? '20px' : '';
-      btn.style.zIndex = isOpen ? '400' : '';
-      document.body.style.overflow = isOpen ? 'hidden' : '';
+      links.classList.contains('open') ? closeMenu() : openMenu();
     });
 
-    // Close on nav link click
+    if (dim) dim.addEventListener('click', closeMenu);
+
     links.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        links.classList.remove('open');
-        btn.classList.remove('open');
-        btn.style.position = '';
-        btn.style.top = '';
-        btn.style.right = '';
-        btn.style.zIndex = '';
-        document.body.style.overflow = '';
-      });
+      a.addEventListener('click', closeMenu);
     });
   })();
 </script>
